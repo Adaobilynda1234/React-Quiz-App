@@ -82,10 +82,29 @@ function QuizProvider({ children }) {
     0
   );
 
+  // useEffect(function () {
+  //   fetch("http://localhost:9000/questions")
+  //     .then((res) => res.json())
+  //     .then((data) => dispatch({ type: "dataReceived", payload: data }))
+  //     .catch((err) => dispatch({ type: "dataFailed" }));
+  // }, []);
   useEffect(function () {
-    fetch("http://localhost:9000/questions")
+    fetch("https://opentdb.com/api.php?amount=15&type=multiple")
       .then((res) => res.json())
-      .then((data) => dispatch({ type: "dataReceived", payload: data }))
+      .then((data) => {
+        // Transform API data to match your current format
+        const transformedQuestions = data.results.map((q, index) => ({
+          question: q.question,
+          options: [q.correct_answer, ...q.incorrect_answers],
+          correctOption: 0, // You'll need to randomize this
+          points: 10,
+        }));
+
+        dispatch({
+          type: "dataReceived",
+          payload: transformedQuestions,
+        });
+      })
       .catch((err) => dispatch({ type: "dataFailed" }));
   }, []);
 
