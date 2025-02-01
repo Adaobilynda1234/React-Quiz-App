@@ -1,13 +1,11 @@
 import { createContext, useContext, useReducer, useEffect } from "react";
+import quizData from "../../data/questions.json"; // Adjust the path as needed
 
 const QuizContext = createContext();
-
 const SECS_PER_QUESTION = 30;
 
 const initialState = {
   questions: [],
-
-  // 'loading', 'error', 'ready', 'active', 'finished'
   status: "loading",
   index: 0,
   answer: null,
@@ -37,7 +35,6 @@ function reducer(state, action) {
       };
     case "newAnswer":
       const question = state.questions.at(state.index);
-
       return {
         ...state,
         answer: action.payload,
@@ -57,16 +54,14 @@ function reducer(state, action) {
       };
     case "restart":
       return { ...initialState, questions: state.questions, status: "ready" };
-
     case "tick":
       return {
         ...state,
         secondsRemaining: state.secondsRemaining - 1,
         status: state.secondsRemaining === 0 ? "finished" : state.status,
       };
-
     default:
-      throw new Error("Action unkonwn");
+      throw new Error("Action unknown");
   }
 }
 
@@ -82,30 +77,9 @@ function QuizProvider({ children }) {
     0
   );
 
-  // useEffect(function () {
-  //   fetch("http://localhost:9000/questions")
-  //     .then((res) => res.json())
-  //     .then((data) => dispatch({ type: "dataReceived", payload: data }))
-  //     .catch((err) => dispatch({ type: "dataFailed" }));
-  // }, []);
-  useEffect(function () {
-    fetch("https://opentdb.com/api.php?amount=15&type=multiple")
-      .then((res) => res.json())
-      .then((data) => {
-        // Transform API data to match your current format
-        const transformedQuestions = data.results.map((q, index) => ({
-          question: q.question,
-          options: [q.correct_answer, ...q.incorrect_answers],
-          correctOption: 0, // You'll need to randomize this
-          points: 10,
-        }));
-
-        dispatch({
-          type: "dataReceived",
-          payload: transformedQuestions,
-        });
-      })
-      .catch((err) => dispatch({ type: "dataFailed" }));
+  useEffect(() => {
+    // Use the imported quizData directly
+    dispatch({ type: "dataReceived", payload: quizData.questions });
   }, []);
 
   return (
@@ -120,7 +94,6 @@ function QuizProvider({ children }) {
         secondsRemaining,
         numQuestions,
         maxPossiblePoints,
-
         dispatch,
       }}
     >
